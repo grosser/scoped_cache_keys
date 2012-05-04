@@ -60,38 +60,4 @@ describe ScopedCacheKeys do
       }.to_not change{ user.scoped_cache_key(:foo) }
     end
   end
-
-  describe "#touch_if_necessary" do
-    context "with a model that has updated_at" do
-      let(:model) do
-        user = User.create!
-        user.update_attribute(:updated_at, 1.month.ago)
-        user
-      end
-
-      it  "increments updated_at" do
-        expect{
-          model.touch_if_necessary
-        }.to change{ model.reload.updated_at.to_i }
-      end
-
-      it  "does not update updated_at if it thinks the model is fresh" do
-        model.touch_if_necessary
-        expect{
-          model.class.update(model.id, :updated_at => 1.month.ago)
-          model.touch_if_necessary
-        }.to change{ model.reload.updated_at.to_i }
-      end
-    end
-
-    context "with a model that does not have updated_at" do
-      let(:model){ Product.create! }
-
-      it "raises" do
-        expect{
-          model.touch_if_necessary
-        }.to raise_error
-      end
-    end
-  end
 end

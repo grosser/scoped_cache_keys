@@ -10,11 +10,6 @@ module ScopedCacheKeys
     Rails.cache.delete(build_scoped_cache_key(scope))
   end
 
-  def touch_if_necessary
-    raise "#{self.class} has no updated_at" unless respond_to? :updated_at=
-    touch if updated_at < 1.second.ago
-  end
-
   private
 
   def build_scoped_cache_key(*scopes)
