@@ -1,8 +1,8 @@
 require 'scoped_cache_keys/version'
 
 module ScopedCacheKeys
-  def scoped_cache_key(scope)
-    base_key = Rails.cache.fetch(build_scoped_cache_key([scope])){ Time.now.to_f }
+  def scoped_cache_key(scope, options = nil)
+    base_key = Rails.cache.fetch(build_scoped_cache_key([scope]), options) { Time.now.to_f }
     build_scoped_cache_key [scope, base_key]
   end
 
