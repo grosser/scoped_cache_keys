@@ -45,6 +45,12 @@ describe ScopedCacheKeys do
         user.updated_at = 1.week.ago
       }.to_not change{ user.scoped_cache_key(:foo) }
     end
+
+    it "accepts cache options such as expired_in" do
+      key = user.scoped_cache_key(:foo, expires_in: 10.seconds)
+      Timecop.travel(11.seconds.from_now)
+      user.scoped_cache_key(:foo).should_not == key
+    end
   end
 
   describe "#expire_scoped_cache_key" do
@@ -58,6 +64,26 @@ describe ScopedCacheKeys do
       expect{
         user.expire_scoped_cache_key :bar
       }.to_not change{ user.scoped_cache_key(:foo) }
+    end
+
+    it "expires a specific scope after a specified delay" do
+      key = user.scoped_cache_key :foo
+      user.expire_scoped_cache_key :foo, delay: 5.seconds
+      Timecop.travel(4.seconds.from_now)
+      user.scoped_cache_key(:foo).should == key
+      Timecop.travel(2.seconds.from_now)
+      user.scoped_cache_key(:foo).should_not == key
+    end
+
+    it "expires a specific scope after a specified global delay" do
+      ScopedCacheKeys.expire_scoped_cache_key_delay = 10.seconds
+      key = user.scoped_cache_key :foo
+      user.expire_scoped_cache_key :foo
+      Timecop.travel(9.seconds.from_now)
+      user.scoped_cache_key(:foo).should == key
+      Timecop.travel(2.seconds.from_now)
+      user.scoped_cache_key(:foo).should_not == key
+      ScopedCacheKeys.expire_scoped_cache_key_delay = nil
     end
   end
 end
